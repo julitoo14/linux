@@ -14,6 +14,7 @@ export class OSProcess implements IProcess {
   x: number;
   y: number;
   isMinimized: boolean = false; // Valor por defecto
+  isMaximized: boolean = false; // Nuevo estado para maximizado
 
   // Constructor: Define cómo se crea un objeto de esta clase.
   constructor(id: string, title: string, component: string) {
@@ -24,6 +25,19 @@ export class OSProcess implements IProcess {
     // Asignación de una posición inicial aleatoria para que no salgan apiladas
     this.x = Math.floor(Math.random() * 100) + 50; 
     this.y = Math.floor(Math.random() * 100) + 50;
+  }
+
+  move(newX: number, newY: number): void {
+    // Si la ventana está maximizada, no permitimos moverla
+    if (this.isMaximized) { 
+      return; 
+    }
+
+    // Actualizamos las propiedades del objeto con las nuevas coordenadas
+    this.x = newX;
+    this.y = newY;
+    
+    // Podemos agregar lógica para evitar que la ventana se salga de la pantalla (opcional)
   }
 
   // Comportamiento (Método de la instancia)
