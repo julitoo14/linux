@@ -52,7 +52,11 @@ const windowStyle = computed(() => {
   <div 
     ref="windowRef" 
     v-show="!process.isMinimized"
-    class="absolute border-2 border-gray-700 bg-gray-200 shadow-xl flex flex-col transition-all duration-200"
+    class="absolute border border-gray-600/50 bg-slate-800/95 text-white shadow-2xl flex flex-col backdrop-blur-sm rounded-lg overflow-hidden"
+    :class="{ 
+      'transition-all duration-300 ease-in-out': !isDragging,  /* 🟢 Solo anima si NO arrastras */
+      'cursor-grabbing': isDragging
+    }"
     :style="windowStyle"
   >
     <div 
