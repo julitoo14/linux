@@ -7,7 +7,7 @@ const store = useWindowManager()
 const isMenuOpen = ref(false)
 
 const time = useDateFormat(useNow(), 'HH:mm')
-const date = useDateFormat(useNow(), 'ddd D MMM')
+const date = useDateFormat(useNow(), 'dddd D MMMM')
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -24,7 +24,7 @@ const handleMenuAction = (action: string) => {
 
 <template>
   <div
-    class="fixed top-0 left-0 w-full h-8 bg-slate-900/60 backdrop-blur-md text-white flex items-center justify-between px-4 z-9999 border-b border-white/5 text-sm select-none shadow-sm"
+    class="fixed top-0 left-0 w-full h-10 px-3 bg-stone-950/60 backdrop-blur-lg text-white flex items-center justify-between z-9999 border-b border-white/20 text-sm select-none shadow-sm"
   >
     <div class="relative">
       <button
@@ -37,7 +37,7 @@ const handleMenuAction = (action: string) => {
 
       <div
         v-if="isMenuOpen"
-        class="absolute top-full left-0 mt-1 w-48 bg-slate-800 border border-gray-700 rounded shadow-xl py-1 flex flex-col"
+        class="absolute top-full left-0 mt-1 w-48 bg-stone-950/60 backdrop-blur-lg border border-gray-700 rounded shadow-xl py-1 flex flex-col"
       >
         <button
           @click="handleMenuAction('about')"
@@ -61,14 +61,14 @@ const handleMenuAction = (action: string) => {
     <div
       class="absolute left-1/2 -translate-x-1/2 font-medium opacity-90 hover:opacity-100 cursor-default"
     >
-      {{ date }} &nbsp; {{ time }}
+      {{ date }} - {{ time }}
     </div>
 
     <div class="flex items-center gap-3">
       <div
         class="flex items-center gap-2 hover:bg-white/10 px-2 py-1 rounded cursor-pointer transition-colors"
       >
-        <span class="font-semibold hidden sm:block">Julián García</span>
+        <span class="font-semibold hidden sm:block">Julián García - Full Stack Developer</span>
         <div
           class="w-5 h-5 bg-linear-to-tr from-green-400 to-blue-500 rounded-full border border-white/20"
         ></div>
