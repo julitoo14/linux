@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'; // 🟢 1. Importamos ref
+import { ref, computed } from 'vue'; // 🟢 Importamos computed
 import type { OSProcess } from '@/models/OSProcess';
 import { useDraggable } from '@vueuse/core';
 import { useWindowManager } from '@/stores/windowManager';
@@ -9,53 +9,92 @@ const props = defineProps<{
 }>();
 
 const store = useWindowManager();
+const windowRef = ref<HTMLElement | null>(null);
+const handleRef = ref<HTMLElement | null>(null);
 
 const handleClose = () => {
   store.closeWindow(props.process.id);
 };
 
-// 🟢 2. Creamos referencias para el elemento Ventana y para la Barra de Título
-const windowRef = ref<HTMLElement | null>(null);
-const handleRef = ref<HTMLElement | null>(null);
-
-// 🟢 3. Inicializamos useDraggable
+// Configuración del arrastre
 const { x, y, isDragging } = useDraggable(windowRef, {
-  // Le decimos: "Usa estos valores iniciales (los de tu clase)"
   initialValue: { x: props.process.x, y: props.process.y },
-  
-  // Le decimos: "Solo permite arrastrar si agarran desde este elemento (la barra)"
   handle: handleRef,
-
-  // Cuando suelta el mouse, guardamos la posición final en tu objeto POO
   onEnd: () => {
-    props.process.x = x.value;
-    props.process.y = y.value;
+    // 🟢 Solo guardamos la posición si NO está maximizada
+    if (!props.process.isMaximized) {
+      props.process.x = x.value;
+      props.process.y = y.value;
+    }
   }
+});
+
+// 🟢 Computed para el estilo dinámico
+const windowStyle = computed(() => {
+  // Si está maximizada, forzamos posición fija y tamaño completo
+  if (props.process.isMaximized) {
+    return {
+      top: '0px',
+      left: '0px',
+      width: '100%',
+      height: '100%',
+      transform: 'none', // Anulamos el movimiento
+      zIndex: 50 // Aseguramos que tape todo
+    };
+  }
+  
+  // Si NO está maximizada, usamos la lógica de ventana flotante
+  return {
+    width: '300px', // O el tamaño que quieras por defecto
+    height: 'auto',
+    transform: `translate(${x.value}px, ${y.value}px)`,
+    zIndex: isDragging.value ? 1000 : 10
+  };
 });
 </script>
 
 <template>
   <div 
     ref="windowRef" 
-    class="absolute p-0.5 border-2 border-gray-700 bg-gray-200 shadow-xl min-w-[300px]"
-    :style="{transform: `translate(${x}px, ${y}px)`, 
-    opacity: isDragging ? 0.8 : (props.process.isMinimized ? 0.3 : 1),
-    zIndex: isDragging ? 1000 : 10
-    }"
+    class="absolute border-2 border-gray-700 bg-gray-200 shadow-xl flex flex-col transition-all duration-200"
+    :style="windowStyle"
   >
     <div 
       ref="handleRef"
-      class="title-bar bg-blue-500 p-1 text-white flex justify-between cursor-move select-none"
+      class="p-1 text-white flex justify-between select-none items-center"
+      :class="[
+        process.isMaximized ? 'cursor-default' : 'cursor-move',
+        isDragging ? 'bg-blue-600' : 'bg-blue-500' 
+      ]"
+      @dblclick="process.toggleMaximize()" 
     >
-      <span>{{ props.process.title }}</span> 
-      <div>
-        <button @click="props.process.minimize()" class="px-2 hover:bg-blue-400">_</button>
-        <button @click="handleClose" class="px-2 hover:bg-red-500">X</button>
+      <span class="font-bold px-2">{{ props.process.title }}</span> 
+      
+      <div class="flex gap-1">
+        <button 
+          @click="process.maximize()" 
+          class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded"
+          title="Maximizar"
+        >
+          <span v-if="process.isMaximized">❐</span>
+          <span v-else>□</span>
+        </button>
+
+        <button 
+          @click="handleClose" 
+          class="w-6 h-6 flex items-center justify-center hover:bg-red-500 rounded"
+          title="Cerrar"
+        >
+          ✕
+        </button>
       </div>
     </div>
     
-    <div class="p-4 bg-white min-h-[150px]">
+    <div class="flex-1 bg-white p-4 overflow-auto">
       Contenido de: {{ props.process.componentName }}
+      <p class="mt-4 text-gray-500 text-sm">
+        Estado: {{ process.isMaximized ? 'Pantalla Completa' : 'Ventana' }}
+      </p>
     </div>
   </div>
 </template>

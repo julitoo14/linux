@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 * {
   margin: 0;
@@ -7,7 +7,9 @@
 }
 
 /* se configura el HTML/Body para que ocupe toda la pantalla sin scroll */
-html, body, #app {
+html,
+body,
+#app {
   width: 100vw;
   height: 100vh;
   overflow: hidden; /* Esto es CLAVE para simular un escritorio */
