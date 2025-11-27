@@ -47,8 +47,7 @@ export class OSProcess implements IProcess {
   }
 
   maximize(): void {
-    this.isMaximized = !this.isMaximized;
-    
+    this.isMaximized = !this.isMaximized
     this.isMinimized = false // Aseguramos que no esté minimizada al maximizar
   }
 

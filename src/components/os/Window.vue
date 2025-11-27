@@ -30,18 +30,27 @@ const { x, y, isDragging } = useDraggable(windowRef, {
 const windowStyle = computed(() => {
   if (props.process.isMaximized) {
     return {
-      top: '0px',
+      // 🟢 TOP: 32px para dejar espacio a la barra superior
+      top: '40px', 
+      
       left: '0px',
-      width: '100%',
-      height: '100%',
+      
+      // 🟢 WIDTH: 100% del ancho
+      width: '100vw',
+      
+      // 🟢 HEIGHT: Restamos 32px (TopBar) + 48px (Taskbar) = 80px
+      height: 'calc(100vh - 97px)', 
+      
       transform: 'none',
-      zIndex: 50
+      zIndex: 50,
+      borderRadius: '10px' // Sin bordes redondeados al maximizar
     };
   }
   
+  // Estilo para ventana normal (flotante)
   return {
-    width: '300px',
-    height: 'auto',
+    width: '600px',
+    height: '400px',
     transform: `translate(${x.value}px, ${y.value}px)`,
     zIndex: isDragging.value ? 1000 : 10
   };
@@ -52,56 +61,43 @@ const windowStyle = computed(() => {
   <div 
     ref="windowRef" 
     v-show="!process.isMinimized"
-    class="absolute border border-gray-600/50 bg-slate-800/95 text-white shadow-2xl flex flex-col backdrop-blur-sm rounded-lg overflow-hidden"
+    class="absolute flex flex-col shadow-2xl overflow-hidden border border-white/10 bg-slate-900/90 backdrop-blur-md text-white pointer-events-auto"
     :class="{ 
-      'transition-all duration-300 ease-in-out': !isDragging,  /* 🟢 Solo anima si NO arrastras */
+      'rounded-lg': !process.isMaximized,
+      /* 🟢 FIX LAG: Desactivamos animación al arrastrar para que sea instantáneo */
+      'transition-all duration-200 ease-out': !isDragging && !process.isMaximized, 
       'cursor-grabbing': isDragging
     }"
     :style="windowStyle"
   >
     <div 
       ref="handleRef"
-      class="p-1 text-white flex justify-between select-none items-center"
-      :class="[
-        process.isMaximized ? 'cursor-default' : 'cursor-move',
-        isDragging ? 'bg-blue-600' : 'bg-blue-500' 
-      ]"
+      class="h-10 px-3 flex justify-between items-center select-none border-b border-white/5 bg-white/5"
+      :class="process.isMaximized ? 'cursor-default' : 'cursor-grab'"
       @dblclick="process.maximize()" 
     >
-      <span class="font-bold px-2">{{ props.process.title }}</span> 
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium tracking-wide opacity-90">{{ props.process.title }}</span>
+      </div>
       
-      <div class="flex gap-1">
-        <button 
-          @click="process.minimize()" 
-          class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded"
-          title="Minimizar"
-        >
-          _
+      <div class="flex gap-2">
+        <button @click.stop="process.minimize()" class="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors">_</button>
+        <button @click.stop="process.maximize()" class="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors">
+           <span v-if="process.isMaximized" class="text-xs">❐</span>
+           <span v-else class="text-xs">□</span>
         </button>
-
-        <button 
-          @click="process.maximize()" 
-          class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded"
-          title="Maximizar"
-        >
-          <span v-if="process.isMaximized">❐</span>
-          <span v-else>□</span>
-        </button>
-
-        <button 
-          @click="handleClose" 
-          class="w-6 h-6 flex items-center justify-center hover:bg-red-500 rounded"
-          title="Cerrar"
-        >
-          ✕
-        </button>
+        <button @click.stop="handleClose" class="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white rounded transition-colors">✕</button>
       </div>
     </div>
     
-    <div class="flex-1 bg-white p-4 overflow-auto">
-      Contenido de: {{ props.process.componentName }}
-      <p class="mt-4 text-gray-500 text-sm">
-        Estado: {{ process.isMaximized ? 'Pantalla Completa' : 'Ventana' }}
+    <div class="flex-1 p-4 overflow-auto bg-slate-900/50 select-text cursor-auto">
+      <h2 class="text-xl font-light mb-2 text-blue-400">Aplicación: {{ props.process.componentName }}</h2>
+      <p class="text-gray-300 text-sm leading-relaxed">
+        ¡Hola! Ahora esta ventana sí responde.
+        <br><br>
+        ✅ <b>Arrastrar:</b> Desde la barra superior.<br>
+        ✅ <b>Maximizar:</b> Doble clic o botón cuadrado.<br>
+        ✅ <b>Interactuar:</b> Puedes seleccionar este texto.
       </p>
     </div>
   </div>
